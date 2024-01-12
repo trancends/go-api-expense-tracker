@@ -23,7 +23,12 @@ func NewExpenseHandler(expenseUC usecase.ExpenseUsecase, rg *gin.RouterGroup) *E
 	}
 }
 
-func (e *ExpenseController) Route() {}
+func (e *ExpenseController) Route() {
+	e.rg.POST("/expenses", e.CreateHandler)
+	e.rg.GET("/expenses", e.GetAllTask)
+	e.rg.GET("/expenses/:id", e.GetTaskById)
+	e.rg.GET("/expenses/type/:type", e.GetTaskByType)
+}
 
 func (e *ExpenseController) CreateHandler(ctx *gin.Context) {
 	var expense model.Expense
