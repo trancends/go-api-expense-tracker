@@ -60,7 +60,7 @@ func (e *ExpenseController) GetAllTask(ctx *gin.Context) {
 	endDate := ctx.Param("endDate")
 
 	if pageParam == "" || sizeParam == "" || startDate == "" || endDate == "" {
-		common.SendErrorResponse(ctx, http.StatusBadRequest, "pagepageParam or sizeParam or startDate or endDate cant be empty")
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "pageParam or sizeParam or startDate or endDate cant be empty")
 		return
 	}
 
