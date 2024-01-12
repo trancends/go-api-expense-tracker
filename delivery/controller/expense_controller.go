@@ -4,6 +4,7 @@ import (
 	"expense-tracker/model"
 	"expense-tracker/shared/common"
 	"expense-tracker/usecase"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -33,6 +34,7 @@ func (e *ExpenseController) Route() {
 func (e *ExpenseController) CreateHandler(ctx *gin.Context) {
 	var expense model.Expense
 	err := ctx.ShouldBind(&expense)
+	log.Println(expense.TransactionType)
 	if err != nil {
 		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid json: "+err.Error())
 	}

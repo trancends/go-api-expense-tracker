@@ -30,7 +30,7 @@ func NewExpenseRepository(db *sql.DB) ExpenseRepository {
 
 func (e *expenseRepository) Create(payload model.Expense) (model.Expense, error) {
 	var err error
-	var expense model.Expense
+	expense := payload
 	currTime := time.Now().Local()
 	expense.CreatedAt = currTime
 	expense.UpdatedAt = &currTime
@@ -39,9 +39,10 @@ func (e *expenseRepository) Create(payload model.Expense) (model.Expense, error)
 	getLastExpense := config.SelectLastInsert
 	insertExpense := config.InsertExpense
 	err = e.db.QueryRow(getLastExpense).Scan(&expense.Balance)
+	log.Println(expense.TransactionType)
 	// handle jika database kosong
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		expense.Balance = expense.Amount
 		err := e.db.QueryRow(
 			insertExpense, expense.Date,
@@ -49,6 +50,7 @@ func (e *expenseRepository) Create(payload model.Expense) (model.Expense, error)
 			expense.Balance, expense.Description,
 			expense.CreatedAt, expense.UpdatedAt).Scan(&expense.ID)
 		if err != nil {
+			log.Println("first time insert: ", err)
 			return model.Expense{}, err
 		}
 	}

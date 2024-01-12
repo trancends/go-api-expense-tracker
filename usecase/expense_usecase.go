@@ -24,6 +24,7 @@ func NewExpenseUsecase(expenseRepository repository.ExpenseRepository) ExpenseUs
 }
 
 func (e *expenseUsecase) CreateNewExpense(payload model.Expense) (model.Expense, error) {
+	// log.Println(payload)
 	expense, err := e.expenseRepository.Create(payload)
 	if err != nil {
 		return model.Expense{}, err
