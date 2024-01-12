@@ -53,6 +53,7 @@ func (e *expenseRepository) Create(payload model.Expense) (model.Expense, error)
 			log.Println("first time insert: ", err)
 			return model.Expense{}, err
 		}
+		return expense, nil
 	}
 
 	if expense.TransactionType == "CREDIT" {
