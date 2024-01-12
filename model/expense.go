@@ -11,7 +11,7 @@ const (
 
 type Expense struct {
 	ID              string          `json:"id"`
-	Date            time.Time       `json:"date"`
+	Date            string          `json:"date"`
 	Amount          float64         `json:"amount"`
 	TransactionType transactionType `json:"transaction_typ"`
 	Balance         float64         `json:"balance"`
