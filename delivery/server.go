@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"log"
 
+	_ "github.com/lib/pq"
+
 	"github.com/gin-gonic/gin"
 )
 
