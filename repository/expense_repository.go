@@ -15,7 +15,7 @@ type ExpenseRepository interface {
 	CreateExpense(payload model.Expense) (model.Expense, error)
 	GetExpense(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
 	GetExpenseById(id string) (model.Expense, error)
-	GetExpenseByType(id string) (model.Expense, error)
+	GetExpenseByType(id string) ([]model.Expense, error)
 }
 
 type expenseRepository struct {
@@ -137,19 +137,31 @@ func (e *expenseRepository) GetExpenseById(id string) (model.Expense, error) {
 	return expense, nil
 }
 
-func (e *expenseRepository) GetExpenseByType(transType string) (model.Expense, error) {
+func (e *expenseRepository) GetExpenseByType(transType string) ([]model.Expense, error) {
 	var expenses []model.Expense
 
-	query := config.SelectExpenseByID
-	err := e.db.QueryRow(query, transType).Scan(
-		expense.ID, expense.Date,
-		expense.Amount, expense.TransactionType,
-		expense.Balance, expense.Description,
-		expense.CreatedAt, expense.UpdatedAt,
-	)
+	query := config.SelectExpenseByType
+	rows, err := e.db.Query(query, transType)
 	if err != nil {
-		log.Println("error query select expense by id:", err.Error())
-		return expense, err
+		log.Println("GetExpenseByType rows:", err.Error())
+		return expenses, err
+	}
+
+	for rows.Next() {
+		var expense model.Expense
+
+		err := rows.Scan(
+			expense.ID, expense.Date,
+			expense.Amount, expense.TransactionType,
+			expense.Balance, expense.Description,
+			expense.CreatedAt, expense.UpdatedAt,
+		)
+		if err != nil {
+			log.Println("err rows.scan GetExpenseByType", err.Error())
+			return expenses, err
+		}
+		expenses = append(expenses, expense)
+
 	}
 
 	return expenses, nil
