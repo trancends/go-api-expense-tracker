@@ -34,7 +34,7 @@ func (e *expenseUsecase) CreateNewExpense(payload model.Expense) (model.Expense,
 }
 
 func (e *expenseUsecase) GetExpense(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error) {
-	expenses, paging, err := e.expenseRepository.Get(startDate, endDate, page, size)
+	expenses, paging, err := e.expenseRepository.GetBetweenDate(startDate, endDate, page, size)
 	if err != nil {
 		return []model.Expense{}, sharedmodel.Paging{}, err
 	}

@@ -54,12 +54,12 @@ func (e *ExpenseController) CreateHandler(ctx *gin.Context) {
 }
 
 func (e *ExpenseController) GetAllTask(ctx *gin.Context) {
-	pageParam := ctx.Param("page")
-	sizeParam := ctx.Param("size")
-	startDate := ctx.Param("startDate")
-	endDate := ctx.Param("endDate")
+	pageQuery := ctx.Query("page")
+	sizeQuery := ctx.Query("size")
+	startDate := ctx.Query("startDate")
+	endDate := ctx.Query("endDate")
 
-	if pageParam == "" || sizeParam == "" || startDate == "" || endDate == "" {
+	if pageQuery == "" || sizeQuery == "" || startDate == "" || endDate == "" {
 		common.SendErrorResponse(ctx, http.StatusBadRequest, "pageParam or sizeParam or startDate or endDate cant be empty")
 		return
 	}
@@ -75,12 +75,12 @@ func (e *ExpenseController) GetAllTask(ctx *gin.Context) {
 		return
 	}
 
-	page, err := strconv.Atoi(pageParam)
+	page, err := strconv.Atoi(pageQuery)
 	if err != nil {
 		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid page param")
 		return
 	}
-	size, err := strconv.Atoi(sizeParam)
+	size, err := strconv.Atoi(sizeQuery)
 	if err != nil {
 		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid psize param")
 		return

@@ -13,7 +13,7 @@ import (
 
 type ExpenseRepository interface {
 	Create(payload model.Expense) (model.Expense, error)
-	Get(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
+	GetBetweenDate(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
 	GetByID(id string) (model.Expense, error)
 	GetByType(id string) ([]model.Expense, error)
 }
@@ -42,7 +42,7 @@ func (e *expenseRepository) Create(payload model.Expense) (model.Expense, error)
 	log.Println(expense.TransactionType)
 	// handle jika database kosong
 	if err != nil {
-		log.Println(err)
+		log.Println("expense repo at create QueryRow", err)
 		expense.Balance = expense.Amount
 		err := e.db.QueryRow(
 			insertExpense, expense.Date,
@@ -74,7 +74,7 @@ func (e *expenseRepository) Create(payload model.Expense) (model.Expense, error)
 	return expense, nil
 }
 
-func (e *expenseRepository) Get(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error) {
+func (e *expenseRepository) GetBetweenDate(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error) {
 	var expenses []model.Expense
 	offset := (page - 1) * size
 	query := config.SelectExpenseBetwenDate
@@ -89,23 +89,24 @@ func (e *expenseRepository) Get(startDate string, endDate string, page int, size
 	for rows.Next() {
 		var expense model.Expense
 		err := rows.Scan(
-			expense.ID,
-			expense.Date,
-			expense.Amount,
-			expense.TransactionType,
-			expense.Balance,
-			expense.Description,
-			expense.CreatedAt,
-			expense.UpdatedAt,
+			&expense.ID,
+			&expense.Date,
+			&expense.Amount,
+			&expense.TransactionType,
+			&expense.Balance,
+			&expense.Description,
+			&expense.CreatedAt,
+			&expense.UpdatedAt,
 		)
 		if err != nil {
+			log.Println("Error expensRepo Get rows.next :", err)
 			return nil, sharedmodel.Paging{}, err
 		}
 		expenses = append(expenses, expense)
 	}
 
 	totalRows := 0
-	err = e.db.QueryRow("SELECT COUNT(id) FROM expenses").Scan(totalRows)
+	err = e.db.QueryRow("SELECT COUNT(id) FROM expenses").Scan(&totalRows)
 	if err != nil {
 		log.Println("totalRows query Count: ", err.Error())
 		return nil, sharedmodel.Paging{}, err
@@ -127,10 +128,10 @@ func (e *expenseRepository) GetByID(id string) (model.Expense, error) {
 
 	query := config.SelectExpenseByID
 	err := e.db.QueryRow(query, id).Scan(
-		expense.ID, expense.Date,
-		expense.Amount, expense.TransactionType,
-		expense.Balance, expense.Description,
-		expense.CreatedAt, expense.UpdatedAt,
+		&expense.ID, &expense.Date,
+		&expense.Amount, &expense.TransactionType,
+		&expense.Balance, &expense.Description,
+		&expense.CreatedAt, &expense.UpdatedAt,
 	)
 	if err != nil {
 		log.Println("error query select expense by id:", err.Error())
@@ -154,10 +155,10 @@ func (e *expenseRepository) GetByType(transType string) ([]model.Expense, error)
 		var expense model.Expense
 
 		err := rows.Scan(
-			expense.ID, expense.Date,
-			expense.Amount, expense.TransactionType,
-			expense.Balance, expense.Description,
-			expense.CreatedAt, expense.UpdatedAt,
+			&expense.ID, &expense.Date,
+			&expense.Amount, &expense.TransactionType,
+			&expense.Balance, &expense.Description,
+			&expense.CreatedAt, &expense.UpdatedAt,
 		)
 		if err != nil {
 			log.Println("err rows.scan GetExpenseByType", err.Error())
