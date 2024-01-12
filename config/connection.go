@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	_ "github.com/lib/pq"
 )
 
 func ConnectDB() *sql.DB {
@@ -16,6 +18,7 @@ func ConnectDB() *sql.DB {
 
 	db, err := sql.Open(cfg.Driver, psqlInfo)
 	if err != nil {
+		fmt.Println(err.Error())
 		log.Fatal(err)
 	}
 
