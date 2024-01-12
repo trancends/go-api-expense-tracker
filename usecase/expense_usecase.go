@@ -7,7 +7,7 @@ import (
 )
 
 type ExpenseUsecase interface {
-	CreateExpense(payload model.Expense) (model.Expense, error)
+	CreateNewExpense(payload model.Expense) (model.Expense, error)
 	GetExpense(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
 	GetExpenseById(id string) (model.Expense, error)
 	GetExpenseByType(id string) ([]model.Expense, error)
@@ -23,8 +23,8 @@ func NewTaskUsecase(expenseRepository repository.ExpenseRepository) ExpenseUseca
 	}
 }
 
-func (e *expenseUsecase) CreateExpense(payload model.Expense) (model.Expense, error) {
-	expense, err := e.expenseRepository.CreateExpense(payload)
+func (e *expenseUsecase) CreateNewExpense(payload model.Expense) (model.Expense, error) {
+	expense, err := e.expenseRepository.Create(payload)
 	if err != nil {
 		return model.Expense{}, err
 	}
@@ -33,7 +33,7 @@ func (e *expenseUsecase) CreateExpense(payload model.Expense) (model.Expense, er
 }
 
 func (e *expenseUsecase) GetExpense(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error) {
-	expenses, paging, err := e.expenseRepository.GetExpense(startDate, endDate, page, size)
+	expenses, paging, err := e.expenseRepository.Get(startDate, endDate, page, size)
 	if err != nil {
 		return []model.Expense{}, sharedmodel.Paging{}, err
 	}
@@ -42,7 +42,7 @@ func (e *expenseUsecase) GetExpense(startDate string, endDate string, page int, 
 }
 
 func (e *expenseUsecase) GetExpenseById(id string) (model.Expense, error) {
-	expense, err := e.expenseRepository.GetExpenseById(id)
+	expense, err := e.expenseRepository.GetByID(id)
 	if err != nil {
 		return model.Expense{}, err
 	}
@@ -51,7 +51,7 @@ func (e *expenseUsecase) GetExpenseById(id string) (model.Expense, error) {
 }
 
 func (e *expenseUsecase) GetExpenseByType(id string) ([]model.Expense, error) {
-	expenses, err := e.expenseRepository.GetExpenseByType(id)
+	expenses, err := e.expenseRepository.GetByType(id)
 	if err != nil {
 		return nil, err
 	}

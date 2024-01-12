@@ -12,10 +12,10 @@ import (
 )
 
 type ExpenseRepository interface {
-	CreateExpense(payload model.Expense) (model.Expense, error)
-	GetExpense(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
-	GetExpenseById(id string) (model.Expense, error)
-	GetExpenseByType(id string) ([]model.Expense, error)
+	Create(payload model.Expense) (model.Expense, error)
+	Get(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
+	GetByID(id string) (model.Expense, error)
+	GetByType(id string) ([]model.Expense, error)
 }
 
 type expenseRepository struct {
@@ -28,7 +28,7 @@ func NewExpenseRepository(db *sql.DB) ExpenseRepository {
 	}
 }
 
-func (e *expenseRepository) CreateExpense(payload model.Expense) (model.Expense, error) {
+func (e *expenseRepository) Create(payload model.Expense) (model.Expense, error) {
 	var err error
 	var expense model.Expense
 	currTime := time.Now().Local()
@@ -71,7 +71,7 @@ func (e *expenseRepository) CreateExpense(payload model.Expense) (model.Expense,
 	return expense, nil
 }
 
-func (e *expenseRepository) GetExpense(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error) {
+func (e *expenseRepository) Get(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error) {
 	var expenses []model.Expense
 	offset := (page - 1) * size
 	query := config.SelectExpenseBetwenDate
@@ -118,7 +118,7 @@ func (e *expenseRepository) GetExpense(startDate string, endDate string, page in
 	return expenses, paging, nil
 }
 
-func (e *expenseRepository) GetExpenseById(id string) (model.Expense, error) {
+func (e *expenseRepository) GetByID(id string) (model.Expense, error) {
 	var expense model.Expense
 	expense.ID = id
 
@@ -137,7 +137,7 @@ func (e *expenseRepository) GetExpenseById(id string) (model.Expense, error) {
 	return expense, nil
 }
 
-func (e *expenseRepository) GetExpenseByType(transType string) ([]model.Expense, error) {
+func (e *expenseRepository) GetByType(transType string) ([]model.Expense, error) {
 	var expenses []model.Expense
 
 	query := config.SelectExpenseByType
