@@ -17,7 +17,7 @@ type expenseUsecase struct {
 	expenseRepository repository.ExpenseRepository
 }
 
-func NewTaskUsecase(expenseRepository repository.ExpenseRepository) ExpenseUsecase {
+func NewExpenseUsecase(expenseRepository repository.ExpenseRepository) ExpenseUsecase {
 	return &expenseUsecase{
 		expenseRepository: expenseRepository,
 	}
