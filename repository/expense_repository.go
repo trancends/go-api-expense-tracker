@@ -29,6 +29,7 @@ func NewExpenseRepository(db *sql.DB) ExpenseRepository {
 }
 
 func (e *expenseRepository) Create(payload model.Expense) (model.Expense, error) {
+	firstTime := false
 	var err error
 	expense := payload
 	currTime := time.Now().Local()
@@ -42,9 +43,15 @@ func (e *expenseRepository) Create(payload model.Expense) (model.Expense, error)
 	log.Println(expense.TransactionType)
 	// handle jika database kosong
 	if err != nil {
+		firstTime = true
 		log.Println("expense repo at create QueryRow", err)
-		expense.Balance = expense.Amount
-		err := e.db.QueryRow(
+	}
+	expense.Balance = expense.Amount
+	if firstTime {
+		if expense.TransactionType == "DEBIT" {
+			return model.Expense{}, fmt.Errorf("fist insert cant be DEBIT")
+		}
+		err = e.db.QueryRow(
 			insertExpense, expense.Date,
 			expense.Amount, expense.TransactionType,
 			expense.Balance, expense.Description,
