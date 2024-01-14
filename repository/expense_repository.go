@@ -16,7 +16,7 @@ type ExpenseRepository interface {
 	Get(page int, size int) ([]model.Expense, sharedmodel.Paging, error)
 	GetBetweenDate(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
 	GetByID(id string) (model.Expense, error)
-	GetByType(id string) ([]model.Expense, error)
+	GetByType(transType string) ([]model.Expense, error)
 }
 
 type expenseRepository struct {
@@ -46,8 +46,8 @@ func (e *expenseRepository) Create(payload model.Expense) (model.Expense, error)
 	if err != nil {
 		firstTime = true
 		log.Println("expense repo at create QueryRow", err)
+		expense.Balance = expense.Amount
 	}
-	expense.Balance = expense.Amount
 	if firstTime {
 		if expense.TransactionType == "DEBIT" {
 			return model.Expense{}, fmt.Errorf("fist insert cant be DEBIT")

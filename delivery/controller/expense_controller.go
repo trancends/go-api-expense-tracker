@@ -92,7 +92,7 @@ func (e *ExpenseController) GetAllTask(ctx *gin.Context) {
 	}
 	_, err = time.Parse("2006-01-02", endDate)
 	if err != nil {
-		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid endDate or startDate is empty")
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid endDate or endDate is empty")
 		return
 	}
 
@@ -118,13 +118,20 @@ func (a *ExpenseController) GetTaskById(ctx *gin.Context) {
 
 func (a *ExpenseController) GetTaskByType(ctx *gin.Context) {
 	transType := ctx.Param("type")
-	if transType != string(model.CREDIT) || transType != string(model.DEBIT) {
+	log.Println(transType)
+	log.Println(transType == model.CREDIT)
+
+	var expenses []model.Expense
+	var err error
+	if transType == model.CREDIT || transType == model.DEBIT {
+		expenses, err = a.expenseUC.GetExpenseByType(transType)
+		if err != nil {
+			common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to fetch expenses")
+			return
+		}
+
+	} else {
 		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid type")
-		return
-	}
-	expenses, err := a.expenseUC.GetExpenseByType(transType)
-	if err != nil {
-		common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to fetch expenses")
 		return
 	}
 

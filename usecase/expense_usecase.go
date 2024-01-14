@@ -11,7 +11,7 @@ type ExpenseUsecase interface {
 	GetExpense(page int, size int) ([]model.Expense, sharedmodel.Paging, error)
 	GetExpenseBetweenDate(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
 	GetExpenseById(id string) (model.Expense, error)
-	GetExpenseByType(id string) ([]model.Expense, error)
+	GetExpenseByType(transType string) ([]model.Expense, error)
 }
 
 type expenseUsecase struct {
@@ -61,8 +61,8 @@ func (e *expenseUsecase) GetExpenseById(id string) (model.Expense, error) {
 	return expense, nil
 }
 
-func (e *expenseUsecase) GetExpenseByType(id string) ([]model.Expense, error) {
-	expenses, err := e.expenseRepository.GetByType(id)
+func (e *expenseUsecase) GetExpenseByType(transType string) ([]model.Expense, error) {
+	expenses, err := e.expenseRepository.GetByType(transType)
 	if err != nil {
 		return nil, err
 	}
