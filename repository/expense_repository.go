@@ -17,6 +17,7 @@ type ExpenseRepository interface {
 	GetBetweenDate(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
 	GetByID(id string) (model.Expense, error)
 	GetByType(transType string) ([]model.Expense, error)
+	CheckFirstInsert() bool
 }
 
 type expenseRepository struct {
@@ -27,6 +28,17 @@ func NewExpenseRepository(db *sql.DB) ExpenseRepository {
 	return &expenseRepository{
 		db: db,
 	}
+}
+
+func (e *expenseRepository) CheckFirstInsert() bool {
+	firstTime := false
+	query := config.SelectLastInsert
+	_, err := e.db.Exec(query)
+	if err != nil {
+		log.Println("err getting last insert", err.Error())
+		firstTime = true
+	}
+	return firstTime
 }
 
 func (e *expenseRepository) Create(payload model.Expense) (model.Expense, error) {
@@ -49,9 +61,6 @@ func (e *expenseRepository) Create(payload model.Expense) (model.Expense, error)
 		expense.Balance = expense.Amount
 	}
 	if firstTime {
-		if expense.TransactionType == "DEBIT" {
-			return model.Expense{}, fmt.Errorf("fist insert cant be DEBIT")
-		}
 		err = e.db.QueryRow(
 			insertExpense, expense.Date,
 			expense.Amount, expense.TransactionType,

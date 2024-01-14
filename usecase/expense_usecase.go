@@ -4,9 +4,11 @@ import (
 	"expense-tracker/model"
 	"expense-tracker/repository"
 	sharedmodel "expense-tracker/shared/shared_model"
+	"fmt"
 )
 
 type ExpenseUsecase interface {
+	CheckFirstExpense(payload model.Expense) error
 	CreateNewExpense(payload model.Expense) (model.Expense, error)
 	GetExpense(page int, size int) ([]model.Expense, sharedmodel.Paging, error)
 	GetExpenseBetweenDate(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
@@ -22,6 +24,17 @@ func NewExpenseUsecase(expenseRepository repository.ExpenseRepository) ExpenseUs
 	return &expenseUsecase{
 		expenseRepository: expenseRepository,
 	}
+}
+
+func (e *expenseUsecase) CheckFirstExpense(payload model.Expense) error {
+	firsTime := e.expenseRepository.CheckFirstInsert()
+	if firsTime {
+		if payload.TransactionType == model.DEBIT {
+			return fmt.Errorf("first time insert cant be DEBIT")
+		}
+	}
+
+	return nil
 }
 
 func (e *expenseUsecase) CreateNewExpense(payload model.Expense) (model.Expense, error) {
