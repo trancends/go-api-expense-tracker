@@ -5,6 +5,7 @@ import (
 	"expense-tracker/repository"
 	sharedmodel "expense-tracker/shared/shared_model"
 	"fmt"
+	"log"
 )
 
 type ExpenseUsecase interface {
@@ -27,8 +28,11 @@ func NewExpenseUsecase(expenseRepository repository.ExpenseRepository) ExpenseUs
 }
 
 func (e *expenseUsecase) CheckFirstExpense(payload model.Expense) error {
-	firsTime := e.expenseRepository.CheckFirstInsert()
+	log.Println("Run CheckFirstExpense")
+	firsTime, _ := e.expenseRepository.CheckFirstInsert()
 	if firsTime {
+		log.Println("if firsTime CheckFirstExpense")
+		log.Println(payload.TransactionType)
 		if payload.TransactionType == model.DEBIT {
 			return fmt.Errorf("first time insert cant be DEBIT")
 		}

@@ -17,7 +17,7 @@ type ExpenseRepository interface {
 	GetBetweenDate(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
 	GetByID(id string) (model.Expense, error)
 	GetByType(transType string) ([]model.Expense, error)
-	CheckFirstInsert() bool
+	CheckFirstInsert() (bool, float64)
 }
 
 type expenseRepository struct {
@@ -30,37 +30,33 @@ func NewExpenseRepository(db *sql.DB) ExpenseRepository {
 	}
 }
 
-func (e *expenseRepository) CheckFirstInsert() bool {
+func (e *expenseRepository) CheckFirstInsert() (bool, float64) {
 	firstTime := false
 	query := config.SelectLastInsert
-	_, err := e.db.Exec(query)
+	var balance float64
+	err := e.db.QueryRow(query).Scan(&balance)
 	if err != nil {
-		log.Println("err getting last insert", err.Error())
+		log.Println("expense repo at create QueryRow getLastInsert", err)
 		firstTime = true
 	}
-	return firstTime
+	return firstTime, balance
 }
 
 func (e *expenseRepository) Create(payload model.Expense) (model.Expense, error) {
-	firstTime := false
 	var err error
 	expense := payload
+	firstTime, balance := e.CheckFirstInsert()
+
 	currTime := time.Now().Local()
+	expense.Balance = balance
 	expense.CreatedAt = currTime
 	expense.UpdatedAt = &currTime
 	expense.Date = fmt.Sprintf("%d-%d-%d", currTime.Year(), currTime.Month(), currTime.Day())
 
-	getLastExpense := config.SelectLastInsert
 	insertExpense := config.InsertExpense
-	err = e.db.QueryRow(getLastExpense).Scan(&expense.Balance)
-	log.Println(expense.TransactionType)
 	// handle jika database kosong
-	if err != nil {
-		firstTime = true
-		log.Println("expense repo at create QueryRow", err)
-		expense.Balance = expense.Amount
-	}
 	if firstTime {
+		expense.Balance = expense.Amount
 		err = e.db.QueryRow(
 			insertExpense, expense.Date,
 			expense.Amount, expense.TransactionType,
