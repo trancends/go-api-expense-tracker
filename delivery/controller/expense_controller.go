@@ -59,22 +59,10 @@ func (e *ExpenseController) GetAllTask(ctx *gin.Context) {
 	startDate := ctx.Query("startDate")
 	endDate := ctx.Query("endDate")
 
-	if pageQuery == "" || sizeQuery == "" || startDate == "" || endDate == "" {
-		common.SendErrorResponse(ctx, http.StatusBadRequest, "pageParam or sizeParam or startDate or endDate cant be empty")
+	if pageQuery == "" || sizeQuery == "" {
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "pageParam or sizeParam cant be empty")
 		return
 	}
-
-	_, err := time.Parse("2006-01-02", startDate)
-	if err != nil {
-		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid startDate")
-		return
-	}
-	_, err = time.Parse("2006-01-02", endDate)
-	if err != nil {
-		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid endDate")
-		return
-	}
-
 	page, err := strconv.Atoi(pageQuery)
 	if err != nil {
 		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid page param")
@@ -86,7 +74,29 @@ func (e *ExpenseController) GetAllTask(ctx *gin.Context) {
 		return
 	}
 
-	expenses, paging, err := e.expenseUC.GetExpense(startDate, endDate, page, size)
+	if startDate == "" && endDate == "" {
+		expenses, paging, err := e.expenseUC.GetExpense(page, size)
+		if err != nil {
+			common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to get expenses "+err.Error())
+			return
+		}
+		common.SendPagedResponse(ctx, expenses, paging, "success")
+		return
+
+	}
+
+	_, err = time.Parse("2006-01-02", startDate)
+	if err != nil {
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid startDate or startDate is empty")
+		return
+	}
+	_, err = time.Parse("2006-01-02", endDate)
+	if err != nil {
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid endDate or startDate is empty")
+		return
+	}
+
+	expenses, paging, err := e.expenseUC.GetExpenseBetweenDate(startDate, endDate, page, size)
 	if err != nil {
 		common.SendErrorResponse(ctx, http.StatusInternalServerError, "failed to get expenses "+err.Error())
 		return

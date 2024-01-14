@@ -8,6 +8,7 @@ const (
 	SelectExpenseBetwenDate = `
     SELECT * FROM expenses 
     WHERE date >= $1 AND date <= $2 LIMIT $3 OFFSET $4 `
+	SelectExpensePaging = `SELECT * FROM expenses LIMIT $1 OFFSET $2 `
 	SelectExpenseByID   = `SELECT * FROM expenses WHERE id = $1`
 	SelectExpenseByType = ` SELECT * FROM expenses WHERE transaction_type = $1`
 )

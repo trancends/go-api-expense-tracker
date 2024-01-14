@@ -13,6 +13,7 @@ import (
 
 type ExpenseRepository interface {
 	Create(payload model.Expense) (model.Expense, error)
+	Get(page int, size int) ([]model.Expense, sharedmodel.Paging, error)
 	GetBetweenDate(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
 	GetByID(id string) (model.Expense, error)
 	GetByType(id string) ([]model.Expense, error)
@@ -87,6 +88,54 @@ func (e *expenseRepository) GetBetweenDate(startDate string, endDate string, pag
 	query := config.SelectExpenseBetwenDate
 
 	rows, err := e.db.Query(query, startDate, endDate, size, offset)
+	if err != nil {
+		log.Println("expenseRepository.Query: ", err.Error())
+		return nil, sharedmodel.Paging{}, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var expense model.Expense
+		err := rows.Scan(
+			&expense.ID,
+			&expense.Date,
+			&expense.Amount,
+			&expense.TransactionType,
+			&expense.Balance,
+			&expense.Description,
+			&expense.CreatedAt,
+			&expense.UpdatedAt,
+		)
+		if err != nil {
+			log.Println("Error expensRepo Get rows.next :", err)
+			return nil, sharedmodel.Paging{}, err
+		}
+		expenses = append(expenses, expense)
+	}
+
+	totalRows := 0
+	err = e.db.QueryRow("SELECT COUNT(id) FROM expenses").Scan(&totalRows)
+	if err != nil {
+		log.Println("totalRows query Count: ", err.Error())
+		return nil, sharedmodel.Paging{}, err
+	}
+
+	paging := sharedmodel.Paging{
+		Page:        page,
+		RowsPerPage: size,
+		TotalRows:   totalRows,
+		TotalPages:  int(math.Ceil(float64(totalRows) / float64(size))),
+	}
+
+	return expenses, paging, nil
+}
+
+func (e *expenseRepository) Get(page int, size int) ([]model.Expense, sharedmodel.Paging, error) {
+	var expenses []model.Expense
+	offset := (page - 1) * size
+	query := config.SelectExpensePaging
+
+	rows, err := e.db.Query(query, size, offset)
 	if err != nil {
 		log.Println("expenseRepository.Query: ", err.Error())
 		return nil, sharedmodel.Paging{}, err

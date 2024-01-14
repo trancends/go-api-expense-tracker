@@ -8,7 +8,8 @@ import (
 
 type ExpenseUsecase interface {
 	CreateNewExpense(payload model.Expense) (model.Expense, error)
-	GetExpense(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
+	GetExpense(page int, size int) ([]model.Expense, sharedmodel.Paging, error)
+	GetExpenseBetweenDate(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error)
 	GetExpenseById(id string) (model.Expense, error)
 	GetExpenseByType(id string) ([]model.Expense, error)
 }
@@ -33,7 +34,16 @@ func (e *expenseUsecase) CreateNewExpense(payload model.Expense) (model.Expense,
 	return expense, nil
 }
 
-func (e *expenseUsecase) GetExpense(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error) {
+func (e *expenseUsecase) GetExpense(page int, size int) ([]model.Expense, sharedmodel.Paging, error) {
+	expenses, paging, err := e.expenseRepository.Get(page, size)
+	if err != nil {
+		return []model.Expense{}, sharedmodel.Paging{}, err
+	}
+
+	return expenses, paging, nil
+}
+
+func (e *expenseUsecase) GetExpenseBetweenDate(startDate string, endDate string, page int, size int) ([]model.Expense, sharedmodel.Paging, error) {
 	expenses, paging, err := e.expenseRepository.GetBetweenDate(startDate, endDate, page, size)
 	if err != nil {
 		return []model.Expense{}, sharedmodel.Paging{}, err
