@@ -43,15 +43,21 @@ func (e *ExpenseController) CreateHandler(ctx *gin.Context) {
 		common.SendErrorResponse(ctx, http.StatusBadRequest, "amount or transactiontype or description cannot be empty")
 		return
 	}
-	err = e.expenseUC.CheckFirstExpense(expense)
-	if err != nil {
-		common.SendErrorResponse(ctx, http.StatusBadRequest, err.Error())
-		return
-	}
+	if expense.TransactionType == model.CREDIT || expense.TransactionType == model.DEBIT {
 
-	expense, err = e.expenseUC.CreateNewExpense(expense)
-	if err != nil {
-		common.SendErrorResponse(ctx, http.StatusInternalServerError, "Failed to create expense: "+err.Error())
+		err = e.expenseUC.CheckFirstExpense(expense)
+		if err != nil {
+			common.SendErrorResponse(ctx, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		expense, err = e.expenseUC.CreateNewExpense(expense)
+		if err != nil {
+			common.SendErrorResponse(ctx, http.StatusInternalServerError, "Failed to create expense: "+err.Error())
+			return
+		}
+	} else {
+		common.SendErrorResponse(ctx, http.StatusBadRequest, "invalid transactiontype")
 		return
 	}
 
