@@ -29,12 +29,17 @@ func NewExpenseUsecase(expenseRepository repository.ExpenseRepository) ExpenseUs
 
 func (e *expenseUsecase) CheckFirstExpense(payload model.Expense) error {
 	log.Println("Run CheckFirstExpense")
-	firsTime, _ := e.expenseRepository.CheckFirstInsert()
+	firsTime, balance := e.expenseRepository.CheckFirstInsert()
 	if firsTime {
 		log.Println("if firsTime CheckFirstExpense")
 		log.Println(payload.TransactionType)
 		if payload.TransactionType == model.DEBIT {
 			return fmt.Errorf("first time insert cant be DEBIT")
+		}
+	}
+	if payload.TransactionType == model.DEBIT {
+		if payload.Amount > balance {
+			return fmt.Errorf("amount cant be greater than current balance")
 		}
 	}
 
