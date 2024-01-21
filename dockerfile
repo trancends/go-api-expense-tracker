@@ -1,5 +1,5 @@
 # use official Golang image
-FROM golang:alpine as build
+FROM golang:1.21.6-alpine3.19 as build
 
 # set working directory
 WORKDIR /app
@@ -8,15 +8,16 @@ WORKDIR /app
 COPY . .
 
 # Download and install the dependencies
-RUN go mod tidy
+RUN go get -d -v ./...
 
 # Build the Go app
-RUN go build -o api .
+RUN go build -o api
 
-FROM alpine:latest
+FROM alpine:3.19.0
 
+WORKDIR /app
 # Copy the binary from the build stage
-COPY --from=build /api /api
+COPY --from=build /app/api .
 
 #EXPOSE the port
 EXPOSE 8000
