@@ -18,6 +18,7 @@ FROM alpine:3.19.0
 WORKDIR /app
 # Copy the binary from the build stage
 COPY --from=build /app/api .
+COPY --from=build /app/.env .
 
 #EXPOSE the port
 EXPOSE 8000
